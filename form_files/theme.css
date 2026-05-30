@@ -1,0 +1,119 @@
+body { background: #E5E5E5; }
+#body_container { background: #c3c3c3; padding: 0 0 4px; }
+#page_container { background: #FFFFFF; }
+
+.highlight { color: #d97211; background: #FFFFE0; }
+
+:link:focus, :visited:focus   { color: #345da4; }
+:link                         { color: #345da4; }
+:visited                      { color: #345da4; }
+:link:hover, :visited:hover   { color: #888888; }
+:link:active, :visited:active { color: #888888; }
+
+.colorAdmin, a.colorAdmin, a.colorAdmin:visited { color: #cc6633 !important; }
+.colorMod,   a.colorMod,   a.colorMod:visited   { color: #cc6633 !important; }
+.colorGroup, a.colorGroup, a.colorGroup:visited { color: #476996 !important; }
+.colorCPH,   a.colorCPH,   a.colorCPH:visited   { color: #0080FF !important; }
+
+.adm, a.adm, a.adm:visited { color: #CC3300; }
+a > i.fa-link { color: #bd7a00; }
+
+.dlWill                                  { color: #0066CC; }
+.dlDown, .leech, .leechmed, .leechsmall  { color: #990000; }
+.dlComplete, .seed, .seedmed, .seedsmall { color: #006600; }
+.dlCancel                                { color: #666666; }
+a.dlWill,     a.dlWill:visited           { color: #0066CC; }
+a.dlDown,     a.dlDown:visited           { color: #990000; }
+a.dlComplete, a.dlComplete:visited       { color: #006600; }
+a.dlCancel,   a.dlCancel:visited         { color: #666666; }
+
+a.leech,         a.leechmed,         a.leechsmall,
+a.leech:visited, a.leechmed:visited, a.leechsmall:visited
+{
+	color: #990000;
+}
+a.seed,         a.seedmed,         a.seedsmall,
+a.seed:visited, a.seedmed:visited, a.seedsmall:visited
+{
+	color: #006600;
+}
+.nick, .nick a {
+	color: #8B0000 !important;
+}
+.nav em { color: #000000; }
+a.topictitle:visited, a.torTopic:visited, a.tLink:visited {
+	color: #003333;
+}
+
+.row1, .row1 td { background: #EFEFEF; }
+.row2, .row2 td { background: #e3e3e3; }
+.row3, .row3 td { background: #D6D6D6; }
+.row4, .row4 td { background: #ECECEC; }
+.row5, .row5 td { background: #E7E7E7; }
+.row6, .row6 td { background: #E9E9E6; }
+
+.gen, .med, .genmed,
+.small, .gensmall   { color: #000000; }
+a.gen, a.med, a.genmed,
+a.small, a.gensmall { color: #345da4; }
+
+.c-body, .q, .sp-wrap, .sp-head, .sp-body {
+	border-color: #cacaca;
+}
+.c-body { color: #345da4; }
+.q { color: #444444; }
+
+.infobox { border-color: #decdcd; }
+.infobox h1 { background: #decdcd; }
+
+input.error { color: #d97211; }
+optgroup { color: #345da4; }
+
+.txtb, .txtb:link, .txtb:visited, .txtb:hover {
+	color: #000000;
+}
+.forumline th, .thHead {
+	background-color: #CCCCCC;
+}
+table.error .msg { color: #d97211; }
+.pm_box_size .progress { background: #345da4; }
+
+.topmenu {
+	background: #E5E5E5; border: 1px solid #C4C4C4;
+}
+.new-pm { background: #FFD9B2; border-color: #CC6600; }
+#main-nav {
+	border: solid #c3c3c3; border-width: 2px 0; background: #c3c3c3;
+	}
+	#main-nav b { padding: 0 4px 0 1px; }
+	#main-nav a {	color: #555555; text-decoration: none; }
+	#main-nav a:hover, #main-nav a:active {
+		text-decoration: none !important; color: #DD6900;
+	}
+.news_date {
+	color: #333333; background: #f6f6f6; border: 1px solid #b5b5b5;
+}
+#latest_news a { color: #555555; }
+#latest_news .new a { color: #DD6900; }
+#sidebar1 h3 a { color: #555555; }
+#sidebar1 a  { color: #555555; }
+
+.cat_title { background-color: #e5e5e5; }
+
+.dot-sf { color: #417998 !important; font-size: 12px; margin-right: 5px; }
+.sf_title { display: block; font-size: 12px; line-height: 15px; }
+
+.attach .denied { color: #990000; }
+
+.warnColor1  { color: #993300; }
+.warnColor2  { color: #d97211; }
+.warnBorder1 { border: 1px solid #d97211; }
+.warningBox1 { border: 1px solid #d97211; color: #993300; }
+.warningBox2 { color: #993300 !important; background: #FFD9B2; border: 2px solid #CC6600; }
+
+.topicAnnounce { color: #CC0000; }
+
+table.forums th { border-bottom: 1px solid #cacaca; }
+table.topic, .topic .td1, .topic .td2, .topic .td3, .post_head, .post_btn_2 { border-color: #cacaca; }
+
+.white { color: #000000; }

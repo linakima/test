@@ -1,0 +1,661 @@
+
+// prototype $
+function $p() {
+  var elements = new Array();
+
+  for (var i = 0; i < arguments.length; i++) {
+    var element = arguments[i];
+    if (typeof element == 'string')
+      element = document.getElementById(element);
+
+    if (arguments.length == 1)
+      return element;
+
+    elements.push(element);
+  }
+
+  return elements;
+}
+
+// from http://www.dustindiaz.com/rock-solid-addevent/
+function addEvent( obj, type, fn ) {
+	if (obj.addEventListener) {
+		obj.addEventListener( type, fn, false );
+		EventCache.add(obj, type, fn);
+	}
+	else if (obj.attachEvent) {
+		obj["e"+type+fn] = fn;
+		obj[type+fn] = function() { obj["e"+type+fn]( window.event ); }
+		obj.attachEvent( "on"+type, obj[type+fn] );
+		EventCache.add(obj, type, fn);
+	}
+	else {
+		obj["on"+type] = obj["e"+type+fn];
+	}
+}
+
+var EventCache = function(){
+	var listEvents = [];
+	return {
+		listEvents : listEvents,
+		add : function(node, sEventName, fHandler){
+			listEvents.push(arguments);
+		},
+		flush : function(){
+			var i, item;
+			for(i = listEvents.length - 1; i >= 0; i = i - 1){
+				item = listEvents[i];
+				if(item[0].removeEventListener){
+					item[0].removeEventListener(item[1], item[2], item[3]);
+				};
+				if(item[1].substring(0, 2) != "on"){
+					item[1] = "on" + item[1];
+				};
+				if(item[0].detachEvent){
+					item[0].detachEvent(item[1], item[2]);
+				};
+				item[0][item[1]] = null;
+			};
+		}
+	};
+}();
+if (document.all) { addEvent(window,'unload',EventCache.flush); }
+
+function imgFit (img, maxW)
+{
+	if (typeof(img.naturalHeight) == 'undefined') {
+		img.naturalHeight = img.height;
+		img.naturalWidth  = img.width;
+	}
+//alert(img.src+'\n\n'+'H: '+img.height+'  natH: '+img.naturalHeight+'\n'+'W: '+img.width+'  natW: '+img.naturalWidth+'  maxW: '+maxW);
+	if (img.width > maxW) {
+		img.height = Math.round((maxW/img.width)*img.height);
+		img.width  = maxW;
+		img.title  = 'Click image to view full size';
+		img.style.cursor = 'move';
+		return false;
+	}
+	else if (img.width == maxW && img.width < img.naturalWidth) {
+		img.height = img.naturalHeight;
+		img.width  = img.naturalWidth;
+		img.title  = 'Click to fit in the browser window';
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+function toggle_block (id)
+{
+	var el = document.getElementById(id);
+	el.style.display = (el.style.display == 'none') ? '' : 'none';
+}
+
+function toggle_disabled (id, val)
+{
+	document.getElementById(id).disabled = (val) ? 0 : 1;
+}
+
+function rand (min, max)
+{
+	return min + Math.floor((max - min + 1) * Math.random());
+}
+
+//
+// Cookie functions [based on ???]
+//
+/**
+ * name       Name of the cookie
+ * value      Value of the cookie
+ * [days]     Number of days to remain active (default: end of current session)
+ * [path]     Path where the cookie is valid (default: path of calling document)
+ * [domain]   Domain where the cookie is valid
+ *            (default: domain of calling document)
+ * [secure]   Boolean value indicating if the cookie transmission requires a
+ *            secure transmission
+ */
+function setCookie (name, value, days, path, domain, secure)
+{
+	if (days != 'SESSION') {
+		var date = new Date();
+		days = days || 365;
+		date.setTime(date.getTime() + days*24*60*60*1000);
+		var expires = date.toGMTString();
+	} else {
+		var expires = '';
+	}
+
+	document.cookie =
+		name +'='+ escape(value)
+	+	((expires) ? '; expires='+ expires : '')
+	+	((path) ? '; path='+ path : ((cookiePath) ? '; path='+ cookiePath : ''))
+	+	((domain) ? '; domain='+ domain : ((cookieDomain) ? '; domain='+ cookieDomain : ''))
+	+	((secure) ? '; secure' : ((cookieSecure) ? '; secure' : ''));
+}
+
+/**
+ * Returns a string containing value of specified cookie,
+ *   or null if cookie does not exist.
+ */
+function getCookie (name)
+{
+	var c, RE = new RegExp('(^|;)\\s*'+ name +'\\s*=\\s*([^\\s;]+)', 'g');
+	return (c = RE.exec(document.cookie)) ? c[2] : null;
+}
+
+/**
+ * name      name of the cookie
+ * [path]    path of the cookie (must be same as path used to create cookie)
+ * [domain]  domain of the cookie (must be same as domain used to create cookie)
+ */
+function deleteCookie (name, path, domain)
+{
+	setCookie(name, '', -1, path, domain);
+}
+
+// Simple Javascript Browser/OS detection (based on "Harald Hope, Tapio Markula, http://techpatterns.com ver 2.0.1")
+var ua = navigator.userAgent;
+
+var os_win = ( navigator.appVersion.indexOf( 'Win' ) != -1 );
+var os_mac = ( navigator.appVersion.indexOf( 'Mac' ) != -1 );
+var os_lin = ( ua.indexOf( 'Linux' ) != -1 );
+
+var is_opera = ( ua.indexOf( 'Opera' ) != -1 );
+var is_konq  = ( ua.indexOf( 'Konqueror' ) != -1 );
+var is_saf   = ( ua.indexOf( 'Safari' ) != -1 );
+var is_moz   = ( ua.indexOf( 'Gecko' ) != -1 && !is_saf && !is_konq);
+var is_ie    = ( document.all && !is_opera );
+var is_ie4   = ( is_ie && !document.getElementById );
+
+// ie5x tests only for functionality
+// Opera will register true in this test if set to identify as IE 5
+var is_ie5x    = ( document.all && document.getElementById );
+var os_ie5mac  = ( os_mac && is_ie5x );
+var os_ie5xwin = ( os_win && is_ie5x );
+
+// Copy text to clipboard. Originally got from decompiled `php_manual_en.chm`.
+function ie_copyTextToClipboard (fromNode)
+{
+	var txt = document.body.createTextRange();
+	txt.moveToElementText(fromNode);
+	return txt.execCommand("Copy");
+}
+
+// Clickable LABELs in IE
+// based on http://web.tampabay.rr.com/bmerkey/examples/clickable-labels.html
+function ie6_make_clickable_labels ()
+{
+	var labels = document.getElementsByTagName("label");
+	for (var i=0, len=labels.length; i<len; i++) {
+		if (!labels[i].getAttribute("htmlFor")) {
+			labels[i].onclick = function() { this.children[0].click(); }
+		}
+	}
+}
+
+//
+// Menus
+//
+var Menu = {
+	openSpeed          : '',
+	hideSpeed          : 'fast',
+	offsetCorrection_X : -4,
+	offsetCorrection_Y : 2,
+	iframeFix          : false,
+
+	activeMenuId       : null,  //  currently opened menu (from previous click)
+	clickedMenuId      : null,  //  menu to show up
+	$root              : null,  //  root element for menu with "href = '#clickedMenuId'"
+	$menu              : null,  //  clicked menu
+	positioningType    : null,  //  reserved
+	outsideClickWatch  : false, //  prevent multiple $(document).click binding
+
+	clicked: function($root) {
+		$root.blur();
+		this.clickedMenuId = this.getMenuId($root);
+		this.$menu = $(this.clickedMenuId);
+		this.$root = $root;
+		this.toggle();
+	},
+
+	hovered: function($root) {
+		if (this.activeMenuId && this.activeMenuId !== this.getMenuId($root)) {
+			this.clicked($root);
+		}
+	},
+
+	unhovered: function($root) {
+	},
+
+	getMenuId: function($el) {
+		var href = $el.attr('href');
+		return href.substr(href.indexOf('#'));
+	},
+
+	setLocation: function() {
+		var CSS = this.$root.offset();
+		CSS.top  += this.$root.height() + this.offsetCorrection_Y;
+		CSS.left += this.offsetCorrection_X;
+		this.$menu.css(CSS);
+	},
+
+	fixLocation: function() {
+		var $menu = this.$menu;
+		var curLeft = parseInt($menu.css('left'));
+		var rCorner = $(document).scrollLeft() + $(window).width() - 6;
+		var maxVisibleLeft = Math.min(curLeft, Math.max(0, rCorner - $menu.width()));
+		if (curLeft != maxVisibleLeft) {
+			$menu.css('left', maxVisibleLeft);
+		}
+		var curTop = parseInt($menu.css('top'));
+		var tCorner = $(document).scrollTop() + $(window).height() - 20;
+		var maxVisibleTop = Math.min(curTop, Math.max(0, tCorner - $menu.height()));
+		if (curTop != maxVisibleTop) {
+			$menu.css('top', maxVisibleTop);
+		}
+		if (this.iframeFix) {
+			$('iframe.ie-fix-select-overlap', $menu).css({ width: $menu.width(), height: $menu.height() });
+		}
+	},
+
+	toggle: function() {
+		if (this.activeMenuId && this.activeMenuId !== this.clickedMenuId) {
+			$(this.activeMenuId).hide(this.hideSpeed);
+		}
+		// toggle clicked menu
+		if (this.$menu.is(':visible')) {
+			this.$menu.hide(this.hideSpeed);
+			this.activeMenuId = null;
+		}	else {
+			this.showClickedMenu();
+			if (!this.outsideClickWatch) {
+				$(document).one('mousedown', function(e){ Menu.hideClickWatcher(e); });
+				this.outsideClickWatch = true;
+			}
+		}
+	},
+
+	showClickedMenu: function() {
+		this.setLocation();
+		this.fixLocation();
+		this.$menu.show();
+		this.activeMenuId = this.clickedMenuId;
+	},
+
+	// hide if clicked outside of menu
+	hideClickWatcher: function(e) {
+		this.outsideClickWatch = false;
+		this.hide(e);
+	},
+
+	hide: function(e) {
+		if (this.$menu) {
+			this.$menu.hide(this.hideSpeed);
+		}
+		this.activeMenuId = this.clickedMenuId = this.$menu = null;
+	}
+};
+
+$(document).ready(function(){
+	// Menus
+	$('body').append($('div.menu-sub'));
+	$('a.menu-root')
+		.click(
+			function(e){ e.preventDefault(); Menu.clicked($(this)); return false; })
+		.hover(
+			function(){ Menu.hovered($(this)); return false; },
+			function(){ Menu.unhovered($(this)); return false; }
+		)
+	;
+	$('div.menu-sub')
+		.mousedown(function(e){ e.stopPropagation(); })
+		.find('a')
+			.click(function(e){ Menu.hide(e); })
+	;
+	// Input hints
+	$('input')
+		.filter('.hint').one('focus', function(){
+			$(this).val('').removeClass('hint');
+		})
+		.end()
+		.filter('.error').one('focus', function(){
+			$(this).removeClass('error');
+		})
+	;
+});
+
+//
+// Ajax
+//
+function Ajax(handlerURL, requestType, dataType) {
+	this.url      = handlerURL;
+	this.type     = requestType;
+	this.dataType = dataType;
+	this.errors   = { };
+}
+
+Ajax.prototype = {
+	init       : {},  // init functions (run before submit, after triggering ajax event)
+	callback   : {},  // callback functions (response handlers)
+	state      : {},  // current action state
+	request    : {},  // request data
+	params     : {},  // action params, format: ajax.params[ElementID] = { param: "val" ... }
+	form_token : '',
+
+	exec: function(request) {
+		this.request[request.action] = request;
+		request['form_token'] = this.form_token;
+		$.ajax({
+			url      : this.url,
+			type     : this.type,
+			dataType : this.dataType,
+			data     : request,
+			success  : ajax.success,
+			error    : ajax.error
+		});
+	},
+
+	success: function(response) {
+		var action = response.action;
+		// raw_output normally might contain only error messages (if php.ini.display_errors == 1)
+		if (response.raw_output) {
+			$('body').prepend(response.raw_output);
+		}
+		if (response.sql_log) {
+			$('#sqlLog').prepend(response.sql_log +'<hr />');
+			fixSqlLog();
+		}
+		if (response.update_ids) {
+			for (id in response.update_ids) {
+				$('#'+id).html( response.update_ids[id] );
+			}
+		}
+		if (response.prompt_password) {
+			var user_password = prompt('Please enter your password (for mod/admin session)', '');
+			if (user_password) {
+				var req = ajax.request[action];
+				req.user_password = user_password;
+				ajax.exec(req);
+			}
+			else {
+				ajax.clearActionState(action);
+				ajax.showErrorMsg('Wrong password');
+			}
+		}
+		else if (response.prompt_confirm) {
+			if (window.confirm(response.confirm_msg)) {
+				var req = ajax.request[action];
+				req.confirmed = 1;
+				ajax.exec(req);
+			}
+			else {
+				ajax.clearActionState(action);
+			}
+		}
+		else if (response.error_code) {
+			ajax.showErrorMsg(response.error_msg);
+			$('.loading-1').removeClass('loading-1').html('error');
+		}
+		else {
+			ajax.callback[action](response);
+			ajax.clearActionState(action);
+		}
+	},
+
+	error: function(xml, desc) {
+	},
+
+	clearActionState: function(action){
+		ajax.state[action] = ajax.request[action] = '';
+	},
+
+	showErrorMsg: function(msg){
+		alert(msg);
+	},
+
+	callInitFn: function(event) {
+		event.stopPropagation();
+		var params = ajax.params[$(this).attr('id')];
+		var action = params.action;
+		if (ajax.state[action] == 'readyToSubmit' || ajax.state[action] == 'error') {
+			return false;
+		} else {
+			ajax.state[action] = 'readyToSubmit';
+		}
+		ajax.init[action](params);
+	},
+
+	setStatusBoxPosition: function($el) {
+		var newTop = $(document).scrollTop();
+		var rCorner = $(document).scrollLeft() + $(window).width() - ($.browser.opera ? 14 : 8);
+		var newLeft = Math.max(0, rCorner - $el.width());
+		$el.css({ top: newTop, left: newLeft });
+	},
+
+	makeEditable: function(rootElementId, editableType) {
+		var $root = $('#'+rootElementId);
+		var $editable = $('.editable', $root);
+		var inputsHtml = $('#editable-tpl-'+editableType).html();
+		$editable.hide().after(inputsHtml);
+		var $inputs = $('.editable-inputs', $root);
+		if (editableType == 'input' || editableType == 'textarea') {
+			$('.editable-value', $inputs).val( $.trim($editable.text()) );
+		}
+		$('input.editable-submit', $inputs).click(function(){
+			var params = ajax.params[rootElementId];
+			var $val = $('.editable-value', '#'+rootElementId);
+			params.value = ($val.size() == 1) ? $val.val() : $val.filter('[checked]').val();
+			params.submit = true;
+			ajax.init[params.action](params);
+		});
+		$('input.editable-cancel', $inputs).click(function(){
+			ajax.restoreEditable(rootElementId);
+		});
+		$inputs.show().find('.editable-value').focus();
+		$root.removeClass('editable-container');
+	},
+
+	restoreEditable: function(rootElementId, newValue) {
+		var $root = $('#'+rootElementId);
+		var $editable = $('.editable', $root);
+		$('.editable-inputs', $root).remove();
+		if (newValue) {
+			$editable.text(newValue);
+		}
+		$editable.show();
+		ajax.clearActionState( ajax.params[rootElementId].action );
+		ajax.params[rootElementId].submit = false;
+		$root.addClass('editable-container');
+	}
+};
+
+function cfm(txt) {
+	return window.confirm(txt);
+}
+
+function bb_alert(txt, is_error) {
+	//alert(txt);
+	txt = txt + '';
+	var html = txt.replace(/\n/g, '<br>');
+	$('#bb-alert-msg').html(html);
+	$('#bb-alert-box').toggleClass('bb-alert-err', is_error == true).modal();
+	return false;
+}
+
+var showAjaxLoading = true;
+$(document).ready(function(){
+	// Setup ajax-loading box
+	$("#ajax-loading").ajaxStart(function(){
+		$("#ajax-error").hide();
+		if (showAjaxLoading) {
+			$(this).show();
+		}
+		ajax.setStatusBoxPosition($(this));
+	});
+	$("#ajax-loading").ajaxStop(function(){ $(this).hide(); });
+
+	// Setup ajax-error box
+	$("#ajax-error").ajaxError(function(req, xml){
+		var status = xml.status;
+		var text = xml.statusText;
+		if (status == 200) {
+			status = '';
+			text = 'invalid data format';
+		}
+		var msg = "Ajax error in: <i>"+ ajax.url +"</i><br /><b>"+ status +" "+ text +"</b>";
+		if (showAjaxLoading) {
+			$(this).html(msg).show();
+		} else {
+			console.log(msg);
+		}
+		ajax.setStatusBoxPosition($(this));
+	});
+
+	// Bind ajax events
+	$('var.ajax-params').each(function(){
+		var params = $.evalJSON( $(this).html() );
+		params.event = params.event || 'dblclick';
+		ajax.params[params.id] = params;
+		$("#"+params.id).bind(params.event, ajax.callInitFn);
+		if (params.event == 'click' || params.event == 'dblclick') {
+			$("#"+params.id).addClass('editable-container');
+		}
+	});
+});
+
+//
+// Cyrillic
+//
+(function () {
+	var cp1251_char_codes = {};
+	$.each([
+		160, 164, 166, 167, 169, 171, 172, 173, 174, 176, 177, 181, 182, 183, 187,
+		1118, 1119, 1168, 1169,
+		8211, 8212, 8216, 8217, 8218, 8220, 8221, 8222, 8224, 8225, 8226, 8230, 8240, 8249, 8250, 8364, 8470, 8482,
+	], function (idx, char_code) {
+		cp1251_char_codes[char_code] = true;
+	});
+
+	String.prototype.to1251 = function () {
+		var txt_js = this + '';
+		var txt_1251 = '';
+		var txt_len = txt_js.length;
+
+		for (var i = 0; i < txt_len; i++) {
+			var c = txt_js.charCodeAt(i);
+			if ((c > 1037 && c < 1104) || c < 128 || (c > 1104 && c < 1117) || (c > 1024 && c < 1037) || cp1251_char_codes[c] != null) {
+				txt_1251 += txt_js[i];
+			} else {
+				txt_1251 += '&#' + c + ';';
+			}
+		}
+		return txt_1251;
+	};
+
+	String.prototype.highlight_non_1251 = function () {
+		var txt_js = this + '';
+		var txt_hl = '';
+		var txt_len = txt_js.length;
+
+		for (var i = 0; i < txt_len; i++) {
+			var c = txt_js.charCodeAt(i);
+			if ((c > 1037 && c < 1104) || c < 128 || (c > 1104 && c < 1117) || (c > 1024 && c < 1037) || cp1251_char_codes[c] != null) {
+				txt_hl += txt_js[i];
+			} else {
+				txt_hl += '<em class="hl-non-1251">' + txt_js[i] + '</em>';
+			}
+		}
+		return txt_hl;
+	};
+
+	String.prototype.count_as_1251 = function () {
+		var txt_js = this.toString();
+		var len = txt_js.length;
+		var cnt = len;
+
+		for (var i = 0; i < len; i++) {
+			var c = txt_js.charCodeAt(i);
+			if ((c > 1037 && c < 1104) || c < 128 || (c > 1104 && c < 1117) || (c > 1024 && c < 1037) || cp1251_char_codes[c] != null) {
+				continue;
+			}
+			cnt += 2 + c.toString().length;
+		}
+		return cnt;
+	};
+})();
+
+
+
+(function(window){var re={not_string:/[^s]/,number:/[dief]/,text:/^[^\x25]+/,modulo:/^\x25{2}/,placeholder:/^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fiosuxX])/,key:/^([a-z_][a-z_\d]*)/i,key_access:/^\.([a-z_][a-z_\d]*)/i,index_access:/^\[(\d+)\]/,sign:/^[\+\-]/}
+function sprintf(){var key=arguments[0],cache=sprintf.cache
+if(!(cache[key]&&cache.hasOwnProperty(key))){cache[key]=sprintf.parse(key)}
+return sprintf.format.call(null,cache[key],arguments)}
+sprintf.format=function(parse_tree,argv){var cursor=1,tree_length=parse_tree.length,node_type="",arg,output=[],i,k,match,pad,pad_character,pad_length,is_positive=!0,sign=""
+for(i=0;i<tree_length;i++){node_type=get_type(parse_tree[i])
+if(node_type==="string"){output[output.length]=parse_tree[i]}
+else if(node_type==="array"){match=parse_tree[i]
+if(match[2]){arg=argv[cursor]
+for(k=0;k<match[2].length;k++){if(!arg.hasOwnProperty(match[2][k])){throw new Error(sprintf("[sprintf] property '%s' does not exist",match[2][k]))}
+arg=arg[match[2][k]]}}
+else if(match[1]){arg=argv[match[1]]}
+else{arg=argv[cursor++]}
+if(get_type(arg)=="function"){arg=arg()}
+if(re.not_string.test(match[8])&&(get_type(arg)!="number"&&isNaN(arg))){throw new TypeError(sprintf("[sprintf] expecting number but found %s",get_type(arg)))}
+if(re.number.test(match[8])){is_positive=arg>=0}
+switch(match[8]){case "b":arg=arg.toString(2)
+break
+case "c":arg=String.fromCharCode(arg)
+break
+case "d":case "i":arg=parseInt(arg,10)
+break
+case "e":arg=match[7]?arg.toExponential(match[7]):arg.toExponential()
+break
+case "f":arg=match[7]?parseFloat(arg).toFixed(match[7]):parseFloat(arg)
+break
+case "o":arg=arg.toString(8)
+break
+case "s":arg=((arg=String(arg))&&match[7]?arg.substring(0,match[7]):arg)
+break
+case "u":arg=arg>>>0
+break
+case "x":arg=arg.toString(16)
+break
+case "X":arg=arg.toString(16).toUpperCase()
+break}
+if(re.number.test(match[8])&&(!is_positive||match[3])){sign=is_positive?"+":"-"
+arg=arg.toString().replace(re.sign,"")}
+else{sign=""}
+pad_character=match[4]?match[4]==="0"?"0":match[4].charAt(1):" "
+pad_length=match[6]-(sign+arg).length
+pad=match[6]?(pad_length>0?str_repeat(pad_character,pad_length):""):""
+output[output.length]=match[5]?sign+arg+pad:(pad_character==="0"?sign+pad+arg:pad+sign+arg)}}
+return output.join("")}
+sprintf.cache={}
+sprintf.parse=function(fmt){var _fmt=fmt,match=[],parse_tree=[],arg_names=0
+while(_fmt){if((match=re.text.exec(_fmt))!==null){parse_tree[parse_tree.length]=match[0]}
+else if((match=re.modulo.exec(_fmt))!==null){parse_tree[parse_tree.length]="%"}
+else if((match=re.placeholder.exec(_fmt))!==null){if(match[2]){arg_names|=1
+var field_list=[],replacement_field=match[2],field_match=[]
+if((field_match=re.key.exec(replacement_field))!==null){field_list[field_list.length]=field_match[1]
+while((replacement_field=replacement_field.substring(field_match[0].length))!==""){if((field_match=re.key_access.exec(replacement_field))!==null){field_list[field_list.length]=field_match[1]}
+else if((field_match=re.index_access.exec(replacement_field))!==null){field_list[field_list.length]=field_match[1]}
+else{throw new SyntaxError("[sprintf] failed to parse named argument key")}}}
+else{throw new SyntaxError("[sprintf] failed to parse named argument key")}
+match[2]=field_list}
+else{arg_names|=2}
+if(arg_names===3){throw new Error("[sprintf] mixing positional and named placeholders is not (yet) supported")}
+parse_tree[parse_tree.length]=match}
+else{throw new SyntaxError("[sprintf] unexpected placeholder")}
+_fmt=_fmt.substring(match[0].length)}
+return parse_tree}
+var vsprintf=function(fmt,argv,_argv){_argv=(argv||[]).slice(0)
+_argv.splice(0,0,fmt)
+return sprintf.apply(null,_argv)}
+function get_type(variable){return Object.prototype.toString.call(variable).slice(8,-1).toLowerCase()}
+function str_repeat(input,multiplier){return Array(multiplier+1).join(input)}
+if(typeof exports!=="undefined"){exports.sprintf=sprintf
+exports.vsprintf=vsprintf}
+else{window.sprintf=sprintf
+window.vsprintf=vsprintf
+if(typeof define==="function"&&define.amd){define(function(){return{sprintf:sprintf,vsprintf:vsprintf}})}}})(typeof window==="undefined"?this:window);
